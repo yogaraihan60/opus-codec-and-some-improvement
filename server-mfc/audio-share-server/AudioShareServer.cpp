@@ -141,6 +141,12 @@ BOOL CAudioShareServerApp::InitInstance()
         return FALSE;
     }
 
+    CFont menuFont;
+    menuFont.CreatePointFont(100, L"Segoe UI");
+    LOGFONT logFont;
+    menuFont.GetLogFont(&logFont);
+    CMFCMenuBar::SetMenuFont(&logFont);
+
     auto dlg = new CMainDialog;
     dlg->Create(IDD_MAIN);
     m_pMainWnd = dlg;
