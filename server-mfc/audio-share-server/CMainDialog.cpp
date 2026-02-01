@@ -171,6 +171,7 @@ BOOL CMainDialog::OnInitDialog()
     SetIcon(m_hIcon, TRUE);			// Set big icon
 
     // TODO: Add extra initialization here
+    SetBackgroundColor(RGB(32, 32, 32));
     ShowNotificationIcon(true);
 
     if (theApp.GetContextMenuManager()->AddMenu(L"SystemTray", IDR_MENU_SYSTEM_TRAY) == FALSE) {
@@ -278,12 +279,16 @@ void CMainDialog::OnDestroy()
 
 HBRUSH CMainDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-    HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+    HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 
-    // handle Transparent background, https://devblogs.microsoft.com/oldnewthing/20111028-00/?p=9243
-    if (pWnd->GetExStyle() & WS_EX_TRANSPARENT) {
-        pDC->SetBkMode(TRANSPARENT);
-        hbr = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
+    // Dark Mode Colors
+    static COLORREF darkColor = RGB(32, 32, 32);
+    static HBRUSH hbrDark = CreateSolidBrush(darkColor);
+
+    if (nCtlColor == CTLCOLOR_DLG || nCtlColor == CTLCOLOR_STATIC) {
+        pDC->SetTextColor(RGB(240, 240, 240)); // White text
+        pDC->SetBkColor(darkColor);
+        return hbrDark;
     }
 
     return hbr;

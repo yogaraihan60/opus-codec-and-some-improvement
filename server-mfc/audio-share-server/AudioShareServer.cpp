@@ -95,7 +95,8 @@ BOOL CAudioShareServerApp::InitInstance()
     //CShellManager *pShellManager = new CShellManager;
 
     // Activate "Windows Native" visual manager for enabling themes in MFC controls
-    CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows));
+    CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerOffice2007));
+    CMFCVisualManagerOffice2007::SetStyle(CMFCVisualManagerOffice2007::Office2007_ObsidianBlack);
 
     // Standard initialization
     // If you are not using these features and wish to reduce the size
@@ -122,6 +123,10 @@ BOOL CAudioShareServerApp::InitInstance()
         ULONG ulNumLanguages = 1;
         SetProcessPreferredUILanguages(MUI_LANGUAGE_NAME, lang.c_str(), &ulNumLanguages);
     }
+
+    auto configTheme = this->GetProfileIntW(L"App", L"theme", CMFCVisualManagerOffice2007::Office2007_ObsidianBlack);
+    CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerOffice2007));
+    CMFCVisualManagerOffice2007::SetStyle((CMFCVisualManagerOffice2007::Style)configTheme);
 
     struct MyCCommandLineInfo : CCommandLineInfo {
         virtual void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast)

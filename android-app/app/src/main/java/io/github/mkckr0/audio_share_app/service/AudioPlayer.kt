@@ -87,15 +87,24 @@ class AudioPlayer(val context: Context) : SimpleBasePlayer(Looper.getMainLooper(
     private var _audioTrack: AudioTrack? = null
     private val audioTrack get() = _audioTrack!!
 
+    // JNI Native methods
+    external fun initOpusDecoder(sampleRate: Int, channels: Int): Int
+    external fun decodeOpus(encodedData: ByteArray, len: Int, outPcm: FloatArray): Int
+    external fun destroyOpusDecoder()
+
+    companion object {
+        var message by mutableStateOf("")
+        
+        init {
+            System.loadLibrary("audio-share-lib")
+        }
+    }
+
     private var _loudnessEnhancer: LoudnessEnhancer? = null
     private val loudnessEnhancer get() = _loudnessEnhancer!!
 
     private val scope: CoroutineScope = MainScope()
     private val retryScope: CoroutineScope = MainScope()
-
-    companion object {
-        var message by mutableStateOf("")
-    }
 
     override fun handleSetPlayWhenReady(playWhenReady: Boolean): ListenableFuture<*> {
         return future {
@@ -180,6 +189,7 @@ class AudioPlayer(val context: Context) : SimpleBasePlayer(Looper.getMainLooper(
 
     inner class NetClientCallBack : NetClient.Callback {
         private val tag = NetClientCallBack::class.simpleName
+        private var isOpus = false
 
         override val scope: CoroutineScope = MainScope() + CoroutineName("NetClientCallbackScope")
 
@@ -189,6 +199,8 @@ class AudioPlayer(val context: Context) : SimpleBasePlayer(Looper.getMainLooper(
         }
 
         override suspend fun onReceiveAudioFormat(format: Client.AudioFormat) {
+            isOpus = format.encoding == Client.AudioFormat.Encoding.ENCODING_OPUS
+            
             val encoding = when (format.encoding) {
                 Client.AudioFormat.Encoding.ENCODING_PCM_FLOAT -> AudioFormat.ENCODING_PCM_FLOAT
                 Client.AudioFormat.Encoding.ENCODING_PCM_8BIT -> AudioFormat.ENCODING_PCM_8BIT
@@ -203,6 +215,11 @@ class AudioPlayer(val context: Context) : SimpleBasePlayer(Looper.getMainLooper(
                     AudioFormat.ENCODING_PCM_32BIT
                 } else {
                     AudioFormat.ENCODING_INVALID
+                }
+                
+                Client.AudioFormat.Encoding.ENCODING_OPUS -> {
+                    initOpusDecoder(format.sampleRate, format.channels)
+                    AudioFormat.ENCODING_PCM_FLOAT
                 }
 
                 else -> {
@@ -286,8 +303,21 @@ class AudioPlayer(val context: Context) : SimpleBasePlayer(Looper.getMainLooper(
         }
 
         override suspend fun onReceiveAudioData(audioData: ByteBuffer) {
-//            Log.d(tag, "${audioData.remaining()}")
-            audioTrack.write(audioData, audioData.remaining(), AudioTrack.WRITE_NON_BLOCKING)
+            if (isOpus) {
+                val data = ByteArray(audioData.remaining())
+                audioData.get(data)
+                
+                // Max frame size for Opus is usually around 120ms (5760 samples at 48kHz)
+                // * 2 channels = 11520 floats
+                val outPcm = FloatArray(12000) 
+                
+                val decodedSamples = decodeOpus(data, data.size, outPcm)
+                if (decodedSamples > 0) {
+                    audioTrack.write(outPcm, 0, decodedSamples * 2, AudioTrack.WRITE_NON_BLOCKING)
+                }
+            } else {
+                audioTrack.write(audioData, audioData.remaining(), AudioTrack.WRITE_NON_BLOCKING)
+            }
         }
 
         override suspend fun onError(message: String?, cause: Throwable?) {

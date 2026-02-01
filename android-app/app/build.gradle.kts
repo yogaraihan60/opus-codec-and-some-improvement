@@ -38,20 +38,39 @@ android {
         targetSdk = 35
         versionCode = 3004
         versionName = "0.3.4"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags("")
+            }
+        }
+
         base.archivesName = "${rootProject.name}-$versionName"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+    ndkVersion = "27.0.12077973"
+
     signingConfigs {
         create("release") {
-            val keystoreProperties = Properties().apply {
-                load(rootProject.file("keystore.properties").inputStream())
+            val keystoreFile = rootProject.file("keystore.properties")
+            if (keystoreFile.exists()) {
+                val keystoreProperties = Properties().apply {
+                    load(keystoreFile.inputStream())
+                }
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                enableV3Signing = true
             }
-            storeFile = file(keystoreProperties.getProperty("storeFile"))
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            storePassword = keystoreProperties.getProperty("storePassword")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-            enableV3Signing = true
         }
     }
 
@@ -67,7 +86,7 @@ android {
     }
 
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
 
     buildFeatures {

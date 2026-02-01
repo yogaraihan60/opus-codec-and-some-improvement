@@ -52,6 +52,7 @@ void CAppSettingsTabPanel::DoDataExchange(CDataExchange* pDX)
     DDX_Check(pDX, IDC_CHECK_AUTORUN, m_bAutoRun);
     DDX_Check(pDX, IDC_CHECK_AUTO_UPDATE, m_bAutoUpdate);
     DDX_Control(pDX, IDC_COMBO_LANGUAGE, m_comboLanguage);
+    DDX_Control(pDX, IDC_COMBO_THEME, m_comboTheme);
 }
 
 
@@ -65,6 +66,7 @@ BEGIN_MESSAGE_MAP(CAppSettingsTabPanel, CTabPanel)
     ON_BN_CLICKED(IDC_BUTTON_UPDATE, &CAppSettingsTabPanel::OnBnClickedButtonUpdate)
     ON_WM_TIMER()
     ON_CBN_SELCHANGE(IDC_COMBO_LANGUAGE, &CAppSettingsTabPanel::OnCbnSelchangeComboLanguage)
+    ON_CBN_SELCHANGE(IDC_COMBO_THEME, &CAppSettingsTabPanel::OnCbnSelchangeComboTheme)
 END_MESSAGE_MAP()
 
 
@@ -73,7 +75,7 @@ END_MESSAGE_MAP()
 
 BOOL CAppSettingsTabPanel::OnInitDialog()
 {
-    CDialogEx::OnInitDialog();
+    CTabPanel::OnInitDialog();
 
     // TODO:  Add extra initialization here
     SHSTOCKICONINFO sii{};
@@ -108,6 +110,28 @@ BOOL CAppSettingsTabPanel::OnInitDialog()
     for (int nIndex = 0; nIndex < m_comboLanguage.GetCount(); ++nIndex) {
         if (configLanguage == (LPCWSTR)m_comboLanguage.GetItemDataPtr(nIndex)) {
             m_comboLanguage.SetCurSel(nIndex);
+            break;
+        }
+    }
+
+    // theme list
+    m_comboTheme.ResetContent();
+    std::vector<std::pair<CMFCVisualManagerOffice2007::Style, std::wstring>> theme_array = {
+        { CMFCVisualManagerOffice2007::Office2007_ObsidianBlack, L"Obsidian Black" },
+        { CMFCVisualManagerOffice2007::Office2007_LunaBlue, L"Luna Blue" },
+        { CMFCVisualManagerOffice2007::Office2007_Aqua, L"Aqua" },
+        { CMFCVisualManagerOffice2007::Office2007_Silver, L"Silver" },
+    };
+    for (auto&& [style, name] : theme_array) {
+        auto nIndex = m_comboTheme.AddString(name.c_str());
+        m_comboTheme.SetItemData(nIndex, (int)style);
+    }
+    
+    auto configTheme = theApp.GetProfileIntW(L"App", L"theme", CMFCVisualManagerOffice2007::Office2007_ObsidianBlack);
+    for (int nIndex = 0; nIndex < m_comboTheme.GetCount(); ++nIndex) {
+        if (configTheme == (int)m_comboTheme.GetItemData(nIndex)) {
+            m_comboTheme.SetCurSel(nIndex);
+            CMFCVisualManagerOffice2007::SetStyle((CMFCVisualManagerOffice2007::Style)configTheme);
             break;
         }
     }
@@ -339,4 +363,12 @@ void CAppSettingsTabPanel::OnCbnSelchangeComboLanguage()
 {
     auto lang = (LPCWSTR)m_comboLanguage.GetItemDataPtr(m_comboLanguage.GetCurSel());
     theApp.WriteProfileStringW(L"App", L"language", lang);
+}
+
+void CAppSettingsTabPanel::OnCbnSelchangeComboTheme()
+{
+    auto style = (CMFCVisualManagerOffice2007::Style)m_comboTheme.GetItemData(m_comboTheme.GetCurSel());
+    CMFCVisualManagerOffice2007::SetStyle(style);
+    CMFCVisualManager::RedrawAll();
+    theApp.WriteProfileInt(L"App", L"theme", (int)style);
 }

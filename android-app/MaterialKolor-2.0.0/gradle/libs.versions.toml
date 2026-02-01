@@ -1,0 +1,33 @@
+[versions]
+sdk-compile = "33"
+sdk-min = "21"
+jvmTarget = "17"
+agp = "8.7.0"
+kotlin = "2.0.20"
+compose-multiplatform = "1.6.11"
+androidx-annotation = "1.8.2"
+binaryCompatibility = "0.16.3"
+dokka = "1.9.20"
+publish = "0.29.0"
+colormath = "3.6.0"
+poko = "0.17.1"
+errorProneAnnotations = "2.33.0"
+kotest = "5.9.1"
+
+[libraries]
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
+colormath = { module = "com.github.ajalt.colormath:colormath", version.ref = "colormath" }
+errorProneAnnotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProneAnnotations" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+binaryCompatibility = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibility" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
+poko = { id = "dev.drewhamilton.poko", version.ref = "poko" }

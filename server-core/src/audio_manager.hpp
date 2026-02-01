@@ -46,6 +46,7 @@ public:
         encoding_s16 = 4,
         encoding_s24 = 5,
         encoding_s32 = 6,
+        encoding_opus = 7,
     };
 
     friend std::istream& operator>>(std::istream& is, encoding_t& e) {
@@ -63,6 +64,8 @@ public:
             e = encoding_t::encoding_s24;
         } else if (s == "s32") {
             e = encoding_t::encoding_s32;
+        } else if (s == "opus") {
+            e = encoding_t::encoding_opus;
         } else {
             e = encoding_t::encoding_invalid;
         }

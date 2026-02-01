@@ -51,4 +51,6 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	CComboBox m_comboLanguage;
 	afx_msg void OnCbnSelchangeComboLanguage();
+	CComboBox m_comboTheme;
+	afx_msg void OnCbnSelchangeComboTheme();
 };

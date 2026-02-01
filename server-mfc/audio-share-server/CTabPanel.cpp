@@ -30,25 +30,26 @@ void CTabPanel::PostNcDestroy()
     delete this;
 }
 
+BOOL CTabPanel::OnInitDialog()
+{
+    CDialogEx::OnInitDialog();
+    SetBackgroundColor(RGB(32, 32, 32));
+    return TRUE;
+}
+
 
 HBRUSH CTabPanel::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-    if (pWnd->GetDlgCtrlID() == IDC_CHECK_AUTORUN) {
-        (HBRUSH)GetStockObject(WHITE_BRUSH);
-    }
     HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 
-    // handle Transparent background, https://devblogs.microsoft.com/oldnewthing/20111028-00/?p=9243
-    if (pWnd->GetExStyle() & WS_EX_TRANSPARENT) {
-        pDC->SetBkMode(TRANSPARENT);
-        TCHAR szTemp[32];
-        ::GetClassName(pWnd->GetSafeHwnd(), szTemp, _countof(szTemp));
-        if (::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE, szTemp, -1, L"Button", -1) == CSTR_EQUAL) {
-            hbr = (HBRUSH)GetStockObject(WHITE_BRUSH);
-        }
-        else {
-            hbr = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
-        }
+    // Dark Mode Colors
+    static COLORREF darkColor = RGB(32, 32, 32);
+    static HBRUSH hbrDark = CreateSolidBrush(darkColor);
+
+    if (nCtlColor == CTLCOLOR_DLG || nCtlColor == CTLCOLOR_STATIC) {
+        pDC->SetTextColor(RGB(240, 240, 240)); // White text
+        pDC->SetBkColor(darkColor);
+        return hbrDark;
     }
 
     return hbr;

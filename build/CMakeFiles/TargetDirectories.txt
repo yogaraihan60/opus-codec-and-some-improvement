@@ -1,0 +1,4 @@
+D:/coding/audioshareop/build/CMakeFiles/server-cmd.dir
+D:/coding/audioshareop/build/CMakeFiles/INSTALL.dir
+D:/coding/audioshareop/build/CMakeFiles/ALL_BUILD.dir
+D:/coding/audioshareop/build/CMakeFiles/ZERO_CHECK.dir

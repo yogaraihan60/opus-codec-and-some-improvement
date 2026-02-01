@@ -22,6 +22,8 @@
 #include <string>
 #include <map>
 
+#include "utils/memory_pool.hpp"
+#include "codec/opus_encoder.hpp"
 #include "pre_asio.hpp"
 #include <asio.hpp>
 #include <asio/use_awaitable.hpp>
@@ -88,6 +90,9 @@ private:
     std::unique_ptr<udp_socket> _udp_server;
     playing_peer_list_t _playing_peer_list;
     constexpr static auto _heartbeat_timeout = std::chrono::seconds(5);
+
+    std::unique_ptr<memory_pool<uint8_t>> _packet_pool;
+    std::unique_ptr<audio_opus_encoder> _opus_encoder;
 };
 
 #endif // !NETWORK_MANAGER_HPP
